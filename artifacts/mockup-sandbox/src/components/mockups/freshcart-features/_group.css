@@ -1,0 +1,36 @@
+.freshcart-ui {
+  --fc-ink: #203b31;
+  --fc-muted: #6d7c73;
+  --fc-paper: #fffaf1;
+  --fc-cream: #f7f0e4;
+  --fc-line: #eadfce;
+  --fc-leaf: #1f7358;
+  --fc-leaf-dark: #185540;
+  --fc-saffron: #e9a13b;
+  --fc-coral: #d96f54;
+  color: var(--fc-ink);
+  background: var(--fc-paper);
+  min-height: 100dvh;
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+}
+.freshcart-ui ::selection { background: #f6d79e; color: var(--fc-ink); }
+.freshcart-display { font-family: "Fraunces", Georgia, serif; letter-spacing: -0.045em; }
+.freshcart-shadow { box-shadow: 0 18px 44px -28px rgba(32,59,49,.42); }
+.freshcart-dotted {
+  background-image: radial-gradient(#d8c9b3 0.8px, transparent 0.8px);
+  background-size: 13px 13px;
+}
+.freshcart-grid {
+  background-image: linear-gradient(#eadfce 1px, transparent 1px), linear-gradient(90deg, #eadfce 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+@keyframes fc-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.fc-rise { animation: fc-rise .55s cubic-bezier(.22,.8,.3,1) both; }
+.fc-rise-1 { animation-delay: .08s; }
+.fc-rise-2 { animation-delay: .16s; }
+.fc-rise-3 { animation-delay: .24s; }
+.fc-rise-4 { animation-delay: .32s; }
+.fc-input:focus { outline: 3px solid rgba(233,161,59,.22); border-color: #e9a13b; }
+@media (max-width: 640px) {
+  .freshcart-ui .fc-hide-mobile { display: none; }
+}

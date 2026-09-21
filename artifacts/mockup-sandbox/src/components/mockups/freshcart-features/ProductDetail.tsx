@@ -1,0 +1,52 @@
+import { useState } from "react";
+import { Check, ChevronDown, ChevronLeft, ChevronRight, Heart, Leaf, MessageCircle, Minus, Plus, ShieldCheck, ShoppingBasket, ThumbsUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { FreshCartShell, Stars } from "./_shared/AppShell";
+import { formatINR } from "./_shared/data";
+
+const reviews = [
+  { initials: "MP", name: "Meera P.", date: "2 days ago", rating: 5, text: "Firm, red and genuinely fresh. Made a quick tomato rasam and the flavour was lovely.", helpful: 18 },
+  { initials: "VK", name: "Vikram K.", date: "1 week ago", rating: 5, text: "Exactly 500 g, no soft ones hidden underneath. This is now on my weekly basket.", helpful: 11 },
+  { initials: "SN", name: "Sahana N.", date: "2 weeks ago", rating: 4, text: "Good quality and the paper bag was a nice touch. A little smaller than expected.", helpful: 7 },
+];
+
+export function ProductDetail() {
+  const [quantity, setQuantity] = useState(1);
+  const [added, setAdded] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [submitted, setSubmitted] = useState(false);
+  return <FreshCartShell active="Shop" cartCount={added ? 4 : 3}>
+    <main className="mx-auto max-w-[1180px] px-4 pb-4 pt-6 sm:px-7">
+      <button className="mb-5 flex items-center gap-1 text-xs font-semibold text-[#6d7c73] hover:text-[#1f7358]"><ChevronLeft size={15} /> Back to fresh produce</button>
+      <div className="grid gap-7 lg:grid-cols-[1.05fr_.95fr]">
+        <div className="grid gap-3 sm:grid-cols-[100px_1fr]">
+          <div className="order-2 flex gap-2 sm:order-1 sm:flex-col"><button className="overflow-hidden rounded-2xl border-2 border-[#e9a13b] bg-[#f4ecdf] p-1"><img src="/__mockup/images/freshcart-tomatoes.png" alt="Tomatoes thumbnail" className="h-20 w-full rounded-xl object-cover" /></button><button className="overflow-hidden rounded-2xl border border-[#eadfce] bg-[#f4ecdf] p-1 opacity-70"><img src="/__mockup/images/freshcart-basket.png" alt="Harvest thumbnail" className="h-20 w-full rounded-xl object-cover" /></button></div>
+          <div className="relative order-1 overflow-hidden rounded-[26px] bg-[#f3e8d7] sm:order-2"><img src="/__mockup/images/freshcart-tomatoes.png" alt="Premium Roma Tomatoes in a woven basket" className="h-[320px] w-full object-cover sm:h-[425px]" /><div className="absolute left-4 top-4 flex items-center gap-1 rounded-full bg-[#fffaf1]/90 px-3 py-1.5 text-[10px] font-bold text-[#1f7358]"><Leaf size={13} /> PICKED TODAY</div><button onClick={() => setLiked(!liked)} className={`absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full ${liked ? "bg-[#d96f54] text-white" : "bg-[#fffaf1]/90 text-[#d96f54]"}`} aria-label="Save product"><Heart size={17} fill={liked ? "currentColor" : "none"} /></button><div className="absolute bottom-4 right-4 flex gap-1"><button className="flex h-8 w-8 items-center justify-center rounded-full bg-[#fffaf1]/90 text-[#203b31]" aria-label="Previous image"><ChevronLeft size={16} /></button><button className="flex h-8 w-8 items-center justify-center rounded-full bg-[#fffaf1]/90 text-[#203b31]" aria-label="Next image"><ChevronRight size={16} /></button></div></div>
+        </div>
+        <div className="flex flex-col justify-center">
+          <div className="flex items-center justify-between"><p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#d96f54]">Fresh produce / Vegetables</p><span className="rounded-full bg-[#e5f0e7] px-2.5 py-1 text-[10px] font-bold text-[#1f7358]">In stock</span></div>
+          <h1 className="freshcart-display mt-3 text-4xl font-bold leading-[1.05] text-[#203b31] sm:text-5xl">Premium Roma<br className="hidden sm:block" /> Tomatoes</h1>
+          <div className="mt-4 flex items-center gap-3"><div className="flex items-center gap-1 rounded-full bg-[#fff1cf] px-2.5 py-1"><Stars value={4.8} size={12} /><span className="text-xs font-bold text-[#885f2f]">4.8</span></div><button className="text-xs text-[#6d7c73] underline underline-offset-2">126 reviews</button></div>
+          <div className="my-6 h-px bg-[#eadfce]" />
+          <div className="flex items-end gap-2"><span className="text-3xl font-bold text-[#1f7358]">{formatINR(48)}</span><span className="pb-1 text-sm text-[#6d7c73]">per 500 g</span></div><p className="mt-2 text-sm leading-6 text-[#6d7c73]">Bright, juicy Roma tomatoes from a farm near Chikkaballapur. Great for rasam, salads and the everyday curry base.</p>
+          <div className="mt-5 rounded-2xl border border-[#eadfce] bg-[#fffdf8] p-4"><div className="flex items-center gap-2 text-xs font-semibold text-[#4f6e5b]"><ShieldCheck size={15} className="text-[#1f7358]" /> Freshness promise</div><p className="mt-1 pl-6 text-xs leading-5 text-[#77847c]">Not happy with the quality? Tell us within 24 hours and we'll make it right.</p></div>
+          <div className="mt-5 flex gap-3"><div className="flex items-center rounded-xl border border-[#d7c8b5] bg-[#fffdf8]"><button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="flex h-11 w-10 items-center justify-center text-[#6d7c73]" aria-label="Decrease quantity"><Minus size={15} /></button><span className="w-7 text-center text-sm font-semibold">{quantity}</span><button onClick={() => setQuantity(quantity + 1)} className="flex h-11 w-10 items-center justify-center text-[#1f7358]" aria-label="Increase quantity"><Plus size={15} /></button></div><Button onClick={() => setAdded(true)} className={`h-11 flex-1 rounded-xl ${added ? "bg-[#e5f0e7] text-[#1f7358] hover:bg-[#e5f0e7]" : "bg-[#1f7358] text-[#fffaf1] hover:bg-[#185540]"}`}>{added ? <><Check size={17} className="mr-2" /> Added to basket</> : <><ShoppingBasket size={17} className="mr-2" /> Add to basket · {formatINR(quantity * 48)}</>}</Button></div>
+          <div className="mt-4 flex items-center gap-2 text-xs text-[#6d7c73]"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#e9a13b] text-[10px] font-bold text-white">1</span> Delivery slot available today <ChevronRight size={14} className="text-[#a18c73]" /></div>
+        </div>
+      </div>
+      <div className="mt-10 grid gap-6 lg:grid-cols-[1.15fr_.85fr]">
+        <Card className="rounded-[22px] border-[#eadfce] bg-[#fffdf8]"><CardContent className="p-5 sm:p-6"><div className="flex items-center justify-between"><div><h2 className="text-lg font-semibold">What shoppers say</h2><p className="mt-1 text-xs text-[#6d7c73]">Real notes from real kitchens.</p></div><Button onClick={() => setReviewOpen(!reviewOpen)} variant="outline" className="rounded-full border-[#d7c8b5] text-xs text-[#1f7358]"><MessageCircle size={14} className="mr-1.5" /> {reviewOpen ? "Close form" : "Write a review"}</Button></div>
+          {reviewOpen && <div className="mt-5 rounded-2xl border border-[#e9dfcf] bg-[#f8f0e4] p-4"><p className="text-sm font-semibold">How was your basket?</p><div className="mt-2 flex gap-1">{[1,2,3,4,5].map((value) => <button key={value} onClick={() => setReviewRating(value)} className={`text-2xl ${value <= reviewRating ? "text-[#e9a13b]" : "text-[#d6c8b6]"}`} aria-label={`${value} stars`}>★</button>)}</div><Input className="mt-3 border-[#decfbd] bg-[#fffdf8]" placeholder="Review title (optional)" /><Textarea className="mt-3 border-[#decfbd] bg-[#fffdf8]" placeholder="Tell the neighbourhood what you thought..." rows={3} /><Button onClick={() => setSubmitted(true)} className="mt-3 rounded-full bg-[#1f7358] text-xs text-white hover:bg-[#185540]">{submitted ? <><Check size={14} className="mr-1" /> Review submitted</> : "Post review"}</Button></div>}
+          <div className="mt-5 flex items-center gap-5 rounded-2xl bg-[#f8f0e4] p-4"><div><div className="freshcart-display text-4xl font-bold text-[#203b31]">4.8</div><Stars value={4.8} size={14} /><p className="mt-1 text-[10px] text-[#8e897e]">126 ratings</p></div><div className="h-16 w-px bg-[#dfd2c1]" /><div className="min-w-0 flex-1 space-y-1.5">{[5,4,3].map((star, i) => <div key={star} className="flex items-center gap-2 text-[10px] text-[#8b8b80]"><span>{star}</span><div className="h-1.5 flex-1 rounded-full bg-[#e5d9c9]"><div className="h-1.5 rounded-full bg-[#e9a13b]" style={{ width: `${[86,10,4][i]}%` }} /></div><span>{[108,13,5][i]}</span></div>)}</div></div>
+          <div className="divide-y divide-[#eee5d8]">{reviews.map((review) => <div key={review.name} className="py-4"><div className="flex items-start gap-3"><div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#e6f0e8] text-xs font-bold text-[#1f7358]">{review.initials}</div><div className="flex-1"><div className="flex items-center justify-between"><p className="text-sm font-semibold">{review.name}</p><span className="text-[11px] text-[#9b9b8e]">{review.date}</span></div><Stars value={review.rating} size={11} /><p className="mt-2 text-sm leading-5 text-[#687970]">{review.text}</p><button className="mt-2 flex items-center gap-1 text-[11px] text-[#8b968d] hover:text-[#1f7358]"><ThumbsUp size={12} /> Helpful · {review.helpful}</button></div></div></div>)}</div>
+        </CardContent></Card>
+        <div className="space-y-4"><div className="freshcart-dotted rounded-[22px] p-5"><p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#c2773e]">Pairs well with</p><h3 className="freshcart-display mt-2 text-2xl font-bold">A little kitchen ritual</h3><p className="mt-1 text-sm leading-5 text-[#6d7c73]">Add basmati rice and fresh paneer to make this week's dinner plan easier.</p><button className="mt-4 flex items-center gap-1 text-xs font-bold text-[#1f7358]">Shop the pairing <ChevronRight size={14} /></button></div><div className="rounded-[22px] border border-[#eadfce] bg-[#edf3ec] p-5"><div className="flex items-center gap-2 font-semibold text-[#1f7358]"><ShieldCheck size={17} /> Local & accountable</div><p className="mt-2 text-sm leading-5 text-[#63796b]">Every produce order tells you where it came from and when it was picked.</p></div></div>
+      </div>
+    </main>
+  </FreshCartShell>;
+}
