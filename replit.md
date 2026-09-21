@@ -1,6 +1,6 @@
-# [Project name]
+# FreshCart Grocery Delivery
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+FreshCart is a fast grocery delivery storefront with INR pricing, catalog discovery, cart persistence, and checkout.
 
 ## Run & Operate
 
@@ -22,23 +22,33 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/fresh-cart/` — React + Vite storefront and shopper flows
+- `artifacts/api-server/src/routes/catalog.ts` — seeded catalog, categories, and merchandising highlights
+- `artifacts/api-server/src/routes/orders.ts` — order placement endpoint
+- `lib/api-spec/openapi.yaml` — source-of-truth API contract
+- `lib/api-client-react/src/generated/` — generated React Query client hooks
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- INR is the only shopper-facing currency in the first release.
+- Cart state is client-side and persisted in localStorage so browsing and reloads preserve the basket.
+- The API server owns catalog filtering and order totals; the initial seed is in memory so the storefront can run without extra setup.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Browse curated categories and featured products.
+- Search, filter, sort, and add grocery products to a persistent cart.
+- Review delivery details and choose COD or UPI at checkout.
+- Place an order and see confirmation with ETA and total.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- The user requested a stronger UI than the reference grocery site and prices in rupees.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Run API codegen after any OpenAPI change.
+- Standalone Vite builds need `PORT` and `BASE_PATH`; managed workflows provide them automatically.
 
 ## Pointers
 

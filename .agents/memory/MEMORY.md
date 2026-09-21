@@ -1,0 +1,1 @@
+- [Generated client DOM iterable types](generated-client-dom-iterable.md) — Orval web clients need iterable DOM typings for generated Headers helpers.

@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "FreshCart Grocery Delivery"
+description = "A polished grocery delivery storefront for discovering fresh produce, pantry essentials, and everyday favorites with quick cart actions and INR pricing."
+version = "1.0.0"
+id = "artifacts/fresh-cart"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21914
+
+[services.development]
+run = "pnpm --filter @workspace/fresh-cart run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/fresh-cart", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/fresh-cart/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21914"
+BASE_PATH = "/"
