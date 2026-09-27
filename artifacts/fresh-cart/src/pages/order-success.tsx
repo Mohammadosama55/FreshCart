@@ -1,4 +1,4 @@
-import { Check, Clock3, PackageCheck, ShoppingBasket } from 'lucide-react';
+import { Check, ChevronRight, Clock3, PackageCheck, ShoppingBasket } from 'lucide-react';
 import { Link } from 'wouter';
 import { useState } from 'react';
 
@@ -21,7 +21,7 @@ export default function OrderSuccess() {
           <div className="p-5"><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[hsl(var(--muted-foreground))]">Arrives</p><p className="mt-2 flex items-center gap-1.5 text-sm font-black" data-testid="text-order-eta"><Clock3 className="h-3.5 w-3.5 text-[hsl(var(--accent))]" />{order?.eta ?? 'In the promised window'}</p></div>
           <div className="p-5"><p className="text-[10px] font-bold uppercase tracking-[.14em] text-[hsl(var(--muted-foreground))]">Payment</p><p className="mt-2 text-sm font-black capitalize" data-testid="text-order-payment">{order?.paymentMethod === 'upi' ? 'UPI' : 'Cash on delivery'}</p></div>
         </div>
-        <div className="mt-9 flex flex-wrap justify-center gap-3"><Link href="/shop" className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--primary))] px-5 py-3.5 text-sm font-bold text-[hsl(var(--primary-foreground))]" data-testid="link-order-shop"><ShoppingBasket className="h-4 w-4" /> Keep shopping</Link><Link href="/" className="inline-flex items-center rounded-full border border-[hsl(var(--border))] px-5 py-3.5 text-sm font-bold" data-testid="link-order-home">Back to FreshCart</Link></div>
+         <div className="mt-9 flex flex-wrap justify-center gap-3"><Link href={order ? `/track/${order.id}` : '/profile'} className="inline-flex items-center gap-2 rounded-full bg-[hsl(var(--primary))] px-5 py-3.5 text-sm font-bold text-[hsl(var(--primary-foreground))]" data-testid="link-track-new-order">Track this order <ChevronRight className="h-4 w-4" /></Link><Link href="/profile" className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] px-5 py-3.5 text-sm font-bold" data-testid="link-order-profile">Your orders</Link><Link href="/shop" className="inline-flex items-center gap-2 rounded-full border border-[hsl(var(--border))] px-5 py-3.5 text-sm font-bold" data-testid="link-order-shop"><ShoppingBasket className="h-4 w-4" /> Keep shopping</Link></div>
       </div>
     </main>
   );

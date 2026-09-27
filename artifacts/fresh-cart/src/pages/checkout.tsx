@@ -1,21 +1,27 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Check, ChevronRight, CircleAlert, CreditCard, MapPin, Minus, Plus, ShieldCheck, Trash2, WalletCards } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
-import { getGetCatalogHighlightsQueryKey, getListProductsQueryKey, useCreateOrder, useGetCatalogHighlights, useListProducts, type OrderInputPaymentMethod } from '@workspace/api-client-react';
+import { getGetCatalogHighlightsQueryKey, getGetProfileQueryKey, getListOrdersQueryKey, getListProductsQueryKey, useCreateOrder, useGetCatalogHighlights, useGetProfile, useListProducts, type OrderInputPaymentMethod } from '@workspace/api-client-react';
 import { formatRupees } from '@/components/product-card';
 import { useCart } from '@/lib/cart';
+import { getClientId } from '@/lib/customer';
 
 const defaultForm = { customerName: '', phone: '', address: '' };
+const clientId = getClientId();
 
 export default function Checkout() {
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const { add, decrement, remove, clear, linesFor, count } = useCart();
   const products = useListProducts(undefined, { query: { queryKey: getListProductsQueryKey() } });
   const highlights = useGetCatalogHighlights({ query: { queryKey: getGetCatalogHighlightsQueryKey() } }).data;
+  const profileQuery = useGetProfile({ clientId }, { query: { enabled: Boolean(clientId), queryKey: getGetProfileQueryKey({ clientId }) } });
   const orderMutation = useCreateOrder();
   const [form, setForm] = useState(defaultForm);
   const [paymentMethod, setPaymentMethod] = useState<OrderInputPaymentMethod>('cod');
   const [formError, setFormError] = useState('');
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const lines = useMemo(() => linesFor(products.data ?? []), [products.data, linesFor]);
   const subtotal = lines.reduce((sum, line) => sum + line.product.price * line.quantity, 0);
   const freeThreshold = highlights?.freeDeliveryThreshold ?? 699;
@@ -23,14 +29,26 @@ export default function Checkout() {
   const total = subtotal + deliveryFee;
   const minimumOrder = highlights?.minimumOrder ?? 199;
 
+  useEffect(() => {
+    if (!profileQuery.data || profileLoaded) return;
+    const defaultAddress = profileQuery.data.addresses.find((address) => address.isDefault) ?? profileQuery.data.addresses[0];
+    setForm({
+      customerName: profileQuery.data.name ?? '',
+      phone: profileQuery.data.phone ?? '',
+      address: defaultAddress?.address ?? '',
+    });
+    setProfileLoaded(true);
+  }, [profileQuery.data, profileLoaded]);
+
   const submitOrder = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (count === 0 || lines.length === 0) { setFormError('Your basket is empty. Add a few essentials before checking out.'); return; }
     if (subtotal < minimumOrder) { setFormError(`A small run starts at ${formatRupees(minimumOrder)}. Add a little more to place this order.`); return; }
     if (!form.customerName.trim() || form.phone.trim().length < 8 || form.address.trim().length < 5) { setFormError('Please fill in your name, phone number, and delivery address.'); return; }
     setFormError('');
-    orderMutation.mutate({ data: { items: lines.map(({ product, quantity }) => ({ productId: product.id, quantity })), customerName: form.customerName.trim(), phone: form.phone.trim(), address: form.address.trim(), paymentMethod } }, {
+    orderMutation.mutate({ data: { clientId, items: lines.map(({ product, quantity }) => ({ productId: product.id, quantity })), customerName: form.customerName.trim(), phone: form.phone.trim(), address: form.address.trim(), paymentMethod } }, {
       onSuccess: (order) => {
+        void queryClient.invalidateQueries({ queryKey: getListOrdersQueryKey({ clientId }) });
         window.sessionStorage.setItem('freshcart-last-order', JSON.stringify(order));
         clear();
         setLocation('/order-success');
@@ -50,7 +68,8 @@ export default function Checkout() {
           <div className="mb-7"><p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-[hsl(var(--accent))]">Almost there</p><h1 className="fc-display text-4xl font-bold sm:text-5xl" data-testid="heading-checkout">Let’s get this to your door.</h1></div>
           <section className="rounded-[24px] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5 sm:p-7" data-testid="section-delivery-details">
             <div className="mb-5 flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-[hsl(var(--secondary))] text-[hsl(var(--primary))]"><MapPin className="h-4 w-4" /></span><div><h2 className="font-black">Delivery details</h2><p className="text-xs text-[hsl(var(--muted-foreground))]">Where should we bring your basket?</p></div></div>
-            <div className="grid gap-4 sm:grid-cols-2">
+             {profileQuery.data?.addresses && profileQuery.data.addresses.length > 0 && <div className="mb-5"><p className="mb-2 text-xs font-bold uppercase tracking-[.1em] text-[hsl(var(--muted-foreground))]">Saved delivery places</p><div className="flex gap-2 overflow-x-auto pb-1">{profileQuery.data.addresses.map((address) => <button type="button" key={address.id} onClick={() => setForm({ ...form, address: address.address })} className={`min-w-[150px] rounded-xl border px-3 py-2.5 text-left transition ${form.address === address.address ? 'border-[hsl(var(--primary))] bg-[hsl(var(--secondary))]' : 'border-[hsl(var(--border))] hover:border-[hsl(var(--primary)/.45)]'}`} data-testid={`button-checkout-address-${address.id}`}><span className="block text-xs font-black">{address.label}{address.isDefault ? ' · Default' : ''}</span><span className="mt-1 block truncate text-[11px] text-[hsl(var(--muted-foreground))]">{address.address}</span></button>)}</div></div>}
+             <div className="grid gap-4 sm:grid-cols-2">
               <label className="sm:col-span-2"><span className="mb-1.5 block text-xs font-bold uppercase tracking-[.1em] text-[hsl(var(--muted-foreground))]">Your name</span><input value={form.customerName} onChange={(event) => setForm({ ...form, customerName: event.target.value })} placeholder="e.g. Asha Mehta" className="h-12 w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-4 text-sm outline-none focus:border-[hsl(var(--accent))]" data-testid="input-customer-name" /></label>
               <label><span className="mb-1.5 block text-xs font-bold uppercase tracking-[.1em] text-[hsl(var(--muted-foreground))]">Phone number</span><input type="tel" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} placeholder="+91 98765 43210" className="h-12 w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-4 text-sm outline-none focus:border-[hsl(var(--accent))]" data-testid="input-customer-phone" /></label>
               <label><span className="mb-1.5 block text-xs font-bold uppercase tracking-[.1em] text-[hsl(var(--muted-foreground))]">Delivery area</span><input value={form.address} onChange={(event) => setForm({ ...form, address: event.target.value })} placeholder="Flat, street, neighbourhood" className="h-12 w-full rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--background))] px-4 text-sm outline-none focus:border-[hsl(var(--accent))]" data-testid="input-customer-address" /></label>

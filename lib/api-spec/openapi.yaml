@@ -104,6 +104,141 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Order"
+    get:
+      operationId: listOrders
+      tags: [orders]
+      summary: List the shopper's orders
+      parameters:
+        - name: clientId
+          in: query
+          required: true
+          schema: { type: string, minLength: 16 }
+      responses:
+        "200":
+          description: Shopper orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+  /order:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get one of the shopper's orders for tracking
+      parameters:
+        - name: orderId
+          in: query
+          required: true
+          schema: { type: string, minLength: 1 }
+        - name: clientId
+          in: query
+          required: true
+          schema: { type: string, minLength: 16 }
+      responses:
+        "200":
+          description: Order details and current tracking status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "404":
+          description: Order not found
+  /profile:
+    get:
+      operationId: getProfile
+      tags: [profile]
+      summary: Get the shopper profile and saved addresses
+      parameters:
+        - name: clientId
+          in: query
+          required: true
+          schema: { type: string, minLength: 16 }
+      responses:
+        "200":
+          description: Shopper profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+    put:
+      operationId: updateProfile
+      tags: [profile]
+      summary: Create or update the shopper profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileInput"
+      responses:
+        "200":
+          description: Updated shopper profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+  /profile/addresses:
+    post:
+      operationId: createAddress
+      tags: [profile]
+      summary: Add a saved delivery address
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddressInput"
+      responses:
+        "201":
+          description: Saved address
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Address"
+  /profile/address:
+    delete:
+      operationId: deleteAddress
+      tags: [profile]
+      summary: Delete a saved address
+      parameters:
+        - name: addressId
+          in: query
+          required: true
+          schema: { type: string, minLength: 1 }
+        - name: clientId
+          in: query
+          required: true
+          schema: { type: string, minLength: 16 }
+      responses:
+        "204":
+          description: Address deleted
+  /profile/addresses/{addressId}:
+    patch:
+      operationId: updateAddress
+      tags: [profile]
+      summary: Update or make a saved address the default
+      parameters:
+        - name: addressId
+          in: path
+          required: true
+          schema: { type: string, minLength: 1 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddressUpdate"
+      responses:
+        "200":
+          description: Updated saved address
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Address"
+        "404":
+          description: Address not found
 components:
   schemas:
     HealthStatus:
@@ -150,10 +285,17 @@ components:
       properties:
         productId: { type: string }
         quantity: { type: integer, minimum: 1 }
+    OrderItem:
+      type: object
+      required: [productId, quantity]
+      properties:
+        productId: { type: string }
+        quantity: { type: integer, minimum: 1 }
     OrderInput:
       type: object
-      required: [items, customerName, phone, address, paymentMethod]
+      required: [clientId, items, customerName, phone, address, paymentMethod]
       properties:
+        clientId: { type: string, minLength: 16 }
         items:
           type: array
           minItems: 1
@@ -167,11 +309,63 @@ components:
           enum: [cod, upi]
     Order:
       type: object
-      required: [id, status, total, eta, paymentMethod]
+      required: [id, clientId, items, customerName, phone, address, status, total, eta, paymentMethod, createdAt]
       properties:
         id: { type: string }
+        clientId: { type: string }
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        customerName: { type: string }
+        phone: { type: string }
+        address: { type: string }
         status: { type: string }
         total: { type: number }
         eta: { type: string }
         paymentMethod: { type: string }
+        createdAt: { type: string, format: date-time }
+    ProfileInput:
+      type: object
+      required: [clientId, name, phone]
+      properties:
+        clientId: { type: string, minLength: 16 }
+        name: { type: string, minLength: 1 }
+        phone: { type: string, minLength: 8 }
+    Address:
+      type: object
+      required: [id, clientId, label, address, isDefault]
+      properties:
+        id: { type: string }
+        clientId: { type: string }
+        label: { type: string }
+        address: { type: string }
+        isDefault: { type: boolean }
+    AddressInput:
+      type: object
+      required: [clientId, label, address]
+      properties:
+        clientId: { type: string, minLength: 16 }
+        label: { type: string, minLength: 1 }
+        address: { type: string, minLength: 5 }
+        isDefault: { type: boolean }
+    AddressUpdate:
+      type: object
+      required: [clientId]
+      properties:
+        clientId: { type: string, minLength: 16 }
+        label: { type: string, minLength: 1 }
+        address: { type: string, minLength: 5 }
+        isDefault: { type: boolean }
+    Profile:
+      type: object
+      required: [clientId, name, phone, addresses]
+      properties:
+        clientId: { type: string }
+        name: { type: string }
+        phone: { type: string }
+        addresses:
+          type: array
+          items:
+            $ref: "#/components/schemas/Address"
 

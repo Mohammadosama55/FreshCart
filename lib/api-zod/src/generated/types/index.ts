@@ -6,12 +6,22 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './address';
+export * from './addressInput';
+export * from './addressUpdate';
 export * from './catalogHighlights';
 export * from './category';
+export * from './deleteAddressParams';
+export * from './getOrderParams';
+export * from './getProfileParams';
 export * from './healthStatus';
+export * from './listOrdersParams';
 export * from './listProductsParams';
 export * from './order';
 export * from './orderInput';
 export * from './orderInputPaymentMethod';
+export * from './orderItem';
 export * from './orderItemInput';
 export * from './product';
+export * from './profile';
+export * from './profileInput';

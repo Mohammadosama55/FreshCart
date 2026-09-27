@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
-import { ArrowRight, Search, ShoppingBasket, Truck, Wifi } from 'lucide-react';
+import { ArrowRight, Search, ShoppingBasket, Truck, UserRound, Wifi } from 'lucide-react';
 import { getGetCatalogHighlightsQueryKey, getHealthCheckQueryKey, useGetCatalogHighlights, useHealthCheck } from '@workspace/api-client-react';
 import { useCart } from '@/lib/cart';
 
@@ -36,6 +36,7 @@ export function SiteHeader() {
         <nav className="hidden items-center gap-6 text-sm font-bold text-[hsl(var(--muted-foreground))] lg:flex">
           <Link href="/" className={`transition-colors hover:text-[hsl(var(--foreground))] ${location === '/' ? 'text-[hsl(var(--foreground))]' : ''}`} data-testid="link-nav-home">Home</Link>
           <Link href="/shop" className={`transition-colors hover:text-[hsl(var(--foreground))] ${isShop ? 'text-[hsl(var(--foreground))]' : ''}`} data-testid="link-nav-shop">Shop all</Link>
+          <Link href="/profile" className={`inline-flex items-center gap-1.5 transition-colors hover:text-[hsl(var(--foreground))] ${location.startsWith('/profile') || location.startsWith('/track') ? 'text-[hsl(var(--foreground))]' : ''}`} data-testid="link-nav-profile"><UserRound className="h-4 w-4" /> Your profile</Link>
         </nav>
 
         <form onSubmit={submitSearch} className="relative ml-auto hidden w-full max-w-[360px] md:block" data-testid="form-header-search">
@@ -49,6 +50,7 @@ export function SiteHeader() {
           />
         </form>
 
+        <Link href="/profile" className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--card))] text-[hsl(var(--foreground))] transition-colors hover:border-[hsl(var(--accent))] hover:text-[hsl(var(--accent))]" aria-label="Open your profile" data-testid="link-header-profile"><UserRound className="h-[17px] w-[17px]" /></Link>
         <Link href="/checkout" className="group relative flex shrink-0 items-center gap-2 rounded-full bg-[hsl(var(--foreground))] px-3.5 py-2.5 text-sm font-bold text-[hsl(var(--background))] transition-transform hover:-translate-y-0.5 sm:px-4" data-testid="link-header-cart">
           <ShoppingBasket className="h-[17px] w-[17px]" />
           <span className="hidden sm:inline">{count ? `${count} ${count === 1 ? 'item' : 'items'} · ` : ''}Cart</span>
@@ -86,6 +88,7 @@ export function SiteFooter() {
           <div className="grid gap-3 text-sm text-[hsl(var(--background)/.72)]">
             <Link href="/shop" className="transition-colors hover:text-[hsl(var(--background))]" data-testid="link-footer-shop">Browse the full shop</Link>
             <Link href="/checkout" className="transition-colors hover:text-[hsl(var(--background))]" data-testid="link-footer-cart">Review your cart</Link>
+            <Link href="/profile" className="transition-colors hover:text-[hsl(var(--background))]" data-testid="link-footer-profile">Your profile & orders</Link>
             <Link href="/" className="transition-colors hover:text-[hsl(var(--background))]" data-testid="link-footer-home">Back to home</Link>
           </div>
         </div>

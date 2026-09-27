@@ -45,6 +45,12 @@ export interface OrderItemInput {
   quantity: number;
 }
 
+export interface OrderItem {
+  productId: string;
+  /** @minimum 1 */
+  quantity: number;
+}
+
 export type OrderInputPaymentMethod = typeof OrderInputPaymentMethod[keyof typeof OrderInputPaymentMethod];
 
 
@@ -54,6 +60,8 @@ export const OrderInputPaymentMethod = {
 } as const;
 
 export interface OrderInput {
+  /** @minLength 16 */
+  clientId: string;
   /** @minItems 1 */
   items: OrderItemInput[];
   /** @minLength 1 */
@@ -67,15 +75,101 @@ export interface OrderInput {
 
 export interface Order {
   id: string;
+  clientId: string;
+  items: OrderItem[];
+  customerName: string;
+  phone: string;
+  address: string;
   status: string;
   total: number;
   eta: string;
   paymentMethod: string;
+  createdAt: string;
+}
+
+export interface ProfileInput {
+  /** @minLength 16 */
+  clientId: string;
+  /** @minLength 1 */
+  name: string;
+  /** @minLength 8 */
+  phone: string;
+}
+
+export interface Address {
+  id: string;
+  clientId: string;
+  label: string;
+  address: string;
+  isDefault: boolean;
+}
+
+export interface AddressInput {
+  /** @minLength 16 */
+  clientId: string;
+  /** @minLength 1 */
+  label: string;
+  /** @minLength 5 */
+  address: string;
+  isDefault?: boolean;
+}
+
+export interface AddressUpdate {
+  /** @minLength 16 */
+  clientId: string;
+  /** @minLength 1 */
+  label?: string;
+  /** @minLength 5 */
+  address?: string;
+  isDefault?: boolean;
+}
+
+export interface Profile {
+  clientId: string;
+  name: string;
+  phone: string;
+  addresses: Address[];
 }
 
 export type ListProductsParams = {
 category?: string;
 search?: string;
 featured?: boolean;
+};
+
+export type ListOrdersParams = {
+/**
+ * @minLength 16
+ */
+clientId: string;
+};
+
+export type GetOrderParams = {
+/**
+ * @minLength 1
+ */
+orderId: string;
+/**
+ * @minLength 16
+ */
+clientId: string;
+};
+
+export type GetProfileParams = {
+/**
+ * @minLength 16
+ */
+clientId: string;
+};
+
+export type DeleteAddressParams = {
+/**
+ * @minLength 1
+ */
+addressId: string;
+/**
+ * @minLength 16
+ */
+clientId: string;
 };
 

@@ -5,11 +5,18 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { OrderItem } from './orderItem';
 
 export interface Order {
   id: string;
+  clientId: string;
+  items: OrderItem[];
+  customerName: string;
+  phone: string;
+  address: string;
   status: string;
   total: number;
   eta: string;
   paymentMethod: string;
+  createdAt: Date;
 }

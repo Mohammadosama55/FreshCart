@@ -70,6 +70,8 @@ export const GetCatalogHighlightsResponse = zod.object({
 /**
  * @summary Place a grocery order
  */
+export const createOrderBodyClientIdMin = 16;
+
 
 
 
@@ -80,6 +82,7 @@ export const createOrderBodyAddressMin = 5;
 
 
 export const CreateOrderBody = zod.object({
+  "clientId": zod.string().min(createOrderBodyClientIdMin),
   "items": zod.array(zod.object({
   "productId": zod.string(),
   "quantity": zod.number().int().min(1)
@@ -90,12 +93,221 @@ export const CreateOrderBody = zod.object({
   "paymentMethod": zod.enum(['cod', 'upi'])
 })
 
+
+
+
 export const CreateOrderResponse = zod.object({
   "id": zod.string(),
+  "clientId": zod.string(),
+  "items": zod.array(zod.object({
+  "productId": zod.string(),
+  "quantity": zod.number().int().min(1)
+})),
+  "customerName": zod.string(),
+  "phone": zod.string(),
+  "address": zod.string(),
   "status": zod.string(),
   "total": zod.number(),
   "eta": zod.string(),
-  "paymentMethod": zod.string()
+  "paymentMethod": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List the shopper's orders
+ */
+export const listOrdersQueryClientIdMin = 16;
+
+
+
+export const ListOrdersQueryParams = zod.object({
+  "clientId": zod.coerce.string().min(listOrdersQueryClientIdMin)
+})
+
+
+
+
+export const ListOrdersResponseItem = zod.object({
+  "id": zod.string(),
+  "clientId": zod.string(),
+  "items": zod.array(zod.object({
+  "productId": zod.string(),
+  "quantity": zod.number().int().min(1)
+})),
+  "customerName": zod.string(),
+  "phone": zod.string(),
+  "address": zod.string(),
+  "status": zod.string(),
+  "total": zod.number(),
+  "eta": zod.string(),
+  "paymentMethod": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+export const ListOrdersResponse = zod.array(ListOrdersResponseItem)
+
+
+/**
+ * @summary Get one of the shopper's orders for tracking
+ */
+
+export const getOrderQueryClientIdMin = 16;
+
+
+
+export const GetOrderQueryParams = zod.object({
+  "orderId": zod.coerce.string().min(1),
+  "clientId": zod.coerce.string().min(getOrderQueryClientIdMin)
+})
+
+
+
+
+export const GetOrderResponse = zod.object({
+  "id": zod.string(),
+  "clientId": zod.string(),
+  "items": zod.array(zod.object({
+  "productId": zod.string(),
+  "quantity": zod.number().int().min(1)
+})),
+  "customerName": zod.string(),
+  "phone": zod.string(),
+  "address": zod.string(),
+  "status": zod.string(),
+  "total": zod.number(),
+  "eta": zod.string(),
+  "paymentMethod": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get the shopper profile and saved addresses
+ */
+export const getProfileQueryClientIdMin = 16;
+
+
+
+export const GetProfileQueryParams = zod.object({
+  "clientId": zod.coerce.string().min(getProfileQueryClientIdMin)
+})
+
+export const GetProfileResponse = zod.object({
+  "clientId": zod.string(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "addresses": zod.array(zod.object({
+  "id": zod.string(),
+  "clientId": zod.string(),
+  "label": zod.string(),
+  "address": zod.string(),
+  "isDefault": zod.boolean()
+}))
+})
+
+
+/**
+ * @summary Create or update the shopper profile
+ */
+export const updateProfileBodyClientIdMin = 16;
+
+
+export const updateProfileBodyPhoneMin = 8;
+
+
+
+export const UpdateProfileBody = zod.object({
+  "clientId": zod.string().min(updateProfileBodyClientIdMin),
+  "name": zod.string().min(1),
+  "phone": zod.string().min(updateProfileBodyPhoneMin)
+})
+
+export const UpdateProfileResponse = zod.object({
+  "clientId": zod.string(),
+  "name": zod.string(),
+  "phone": zod.string(),
+  "addresses": zod.array(zod.object({
+  "id": zod.string(),
+  "clientId": zod.string(),
+  "label": zod.string(),
+  "address": zod.string(),
+  "isDefault": zod.boolean()
+}))
+})
+
+
+/**
+ * @summary Add a saved delivery address
+ */
+export const createAddressBodyClientIdMin = 16;
+
+
+export const createAddressBodyAddressMin = 5;
+
+
+
+export const CreateAddressBody = zod.object({
+  "clientId": zod.string().min(createAddressBodyClientIdMin),
+  "label": zod.string().min(1),
+  "address": zod.string().min(createAddressBodyAddressMin),
+  "isDefault": zod.boolean().optional()
+})
+
+export const CreateAddressResponse = zod.object({
+  "id": zod.string(),
+  "clientId": zod.string(),
+  "label": zod.string(),
+  "address": zod.string(),
+  "isDefault": zod.boolean()
+})
+
+
+/**
+ * @summary Delete a saved address
+ */
+
+export const deleteAddressQueryClientIdMin = 16;
+
+
+
+export const DeleteAddressQueryParams = zod.object({
+  "addressId": zod.coerce.string().min(1),
+  "clientId": zod.coerce.string().min(deleteAddressQueryClientIdMin)
+})
+
+export const DeleteAddressResponse = zod.void()
+
+
+/**
+ * @summary Update or make a saved address the default
+ */
+
+
+
+export const UpdateAddressParams = zod.object({
+  "addressId": zod.coerce.string().min(1)
+})
+
+export const updateAddressBodyClientIdMin = 16;
+
+
+export const updateAddressBodyAddressMin = 5;
+
+
+
+export const UpdateAddressBody = zod.object({
+  "clientId": zod.string().min(updateAddressBodyClientIdMin),
+  "label": zod.string().min(1).optional(),
+  "address": zod.string().min(updateAddressBodyAddressMin).optional(),
+  "isDefault": zod.boolean().optional()
+})
+
+export const UpdateAddressResponse = zod.object({
+  "id": zod.string(),
+  "clientId": zod.string(),
+  "label": zod.string(),
+  "address": zod.string(),
+  "isDefault": zod.boolean()
 })
 
 

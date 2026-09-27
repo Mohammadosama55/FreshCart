@@ -8,6 +8,8 @@ import Home from '@/pages/home';
 import Shop from '@/pages/shop';
 import Checkout from '@/pages/checkout';
 import OrderSuccess from '@/pages/order-success';
+import Profile from '@/pages/profile';
+import OrderTracking from '@/pages/order-tracking';
 import { CartProvider } from '@/lib/cart';
 import { SiteShell } from '@/components/site-shell';
 import {
@@ -30,6 +32,8 @@ function Router() {
           <Route path="/shop" component={Shop} />
           <Route path="/checkout" component={Checkout} />
           <Route path="/order-success" component={OrderSuccess} />
+          <Route path="/profile" component={Profile} />
+          <Route path="/track/:orderId" component={OrderTracking} />
           <Route component={NotFound} />
         </Switch>
       </SiteShell>

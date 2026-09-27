@@ -20,13 +20,22 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  Address,
+  AddressInput,
+  AddressUpdate,
   CatalogHighlights,
   Category,
+  DeleteAddressParams,
+  GetOrderParams,
+  GetProfileParams,
   HealthStatus,
+  ListOrdersParams,
   ListProductsParams,
   Order,
   OrderInput,
-  Product
+  Product,
+  Profile,
+  ProfileInput
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -460,5 +469,603 @@ export const useCreateOrder = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getCreateOrderMutationOptions(options));
+    }
+
+export const getListOrdersUrl = (params: ListOrdersParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/orders?${stringifiedParams}` : `/api/orders`
+}
+
+/**
+ * @summary List the shopper's orders
+ */
+export const listOrders = async (params: ListOrdersParams, options?: Parameters<typeof customFetch>[1]): Promise<Order[]> => {
+
+  return customFetch<Order[]>(getListOrdersUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListOrdersQueryKey = (params?: ListOrdersParams,) => {
+    return [
+    `/api/orders`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListOrdersQueryOptions = <TData = Awaited<ReturnType<typeof listOrders>>, TError = ErrorType<unknown>>(params: ListOrdersParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listOrders>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListOrdersQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listOrders>>> = ({ signal }) => listOrders(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listOrders>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListOrdersQueryResult = NonNullable<Awaited<ReturnType<typeof listOrders>>>
+export type ListOrdersQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List the shopper's orders
+ */
+
+export function useListOrders<TData = Awaited<ReturnType<typeof listOrders>>, TError = ErrorType<unknown>>(
+ params: ListOrdersParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listOrders>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListOrdersQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetOrderUrl = (params: GetOrderParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/order?${stringifiedParams}` : `/api/order`
+}
+
+/**
+ * @summary Get one of the shopper's orders for tracking
+ */
+export const getOrder = async (params: GetOrderParams, options?: Parameters<typeof customFetch>[1]): Promise<Order> => {
+
+  return customFetch<Order>(getGetOrderUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetOrderQueryKey = (params?: GetOrderParams,) => {
+    return [
+    `/api/order`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetOrderQueryOptions = <TData = Awaited<ReturnType<typeof getOrder>>, TError = ErrorType<void>>(params: GetOrderParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOrder>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetOrderQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getOrder>>> = ({ signal }) => getOrder(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getOrder>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetOrderQueryResult = NonNullable<Awaited<ReturnType<typeof getOrder>>>
+export type GetOrderQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get one of the shopper's orders for tracking
+ */
+
+export function useGetOrder<TData = Awaited<ReturnType<typeof getOrder>>, TError = ErrorType<void>>(
+ params: GetOrderParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOrder>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetOrderQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetProfileUrl = (params: GetProfileParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/profile?${stringifiedParams}` : `/api/profile`
+}
+
+/**
+ * @summary Get the shopper profile and saved addresses
+ */
+export const getProfile = async (params: GetProfileParams, options?: Parameters<typeof customFetch>[1]): Promise<Profile> => {
+
+  return customFetch<Profile>(getGetProfileUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetProfileQueryKey = (params?: GetProfileParams,) => {
+    return [
+    `/api/profile`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetProfileQueryOptions = <TData = Awaited<ReturnType<typeof getProfile>>, TError = ErrorType<unknown>>(params: GetProfileParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetProfileQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProfile>>> = ({ signal }) => getProfile(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProfile>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetProfileQueryResult = NonNullable<Awaited<ReturnType<typeof getProfile>>>
+export type GetProfileQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get the shopper profile and saved addresses
+ */
+
+export function useGetProfile<TData = Awaited<ReturnType<typeof getProfile>>, TError = ErrorType<unknown>>(
+ params: GetProfileParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getProfile>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetProfileQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateProfileUrl = () => {
+
+
+
+
+  return `/api/profile`
+}
+
+/**
+ * @summary Create or update the shopper profile
+ */
+export const updateProfile = async (profileInput: ProfileInput, options?: Parameters<typeof customFetch>[1]): Promise<Profile> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Profile>(getUpdateProfileUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(profileInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateProfileMutationKey = () => ['updateProfile'] as const;
+
+export const getUpdateProfileMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProfile>>, TError,UpdateProfileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateProfile>>, TError,UpdateProfileMutationVariables, TContext> => {
+
+const mutationKey = getUpdateProfileMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateProfile>>, UpdateProfileMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateProfile(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateProfileMutationResult = NonNullable<Awaited<ReturnType<typeof updateProfile>>>
+    export type UpdateProfileMutationBody = BodyType<ProfileInput>
+    export type UpdateProfileMutationError = ErrorType<unknown>
+    export type UpdateProfileMutationVariables = {data: BodyType<ProfileInput>}
+
+    /**
+ * @summary Create or update the shopper profile
+ */
+export const useUpdateProfile = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProfile>>, TError,UpdateProfileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateProfile>>,
+        TError,
+        UpdateProfileMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateProfileMutationOptions(options));
+    }
+
+export const getCreateAddressUrl = () => {
+
+
+
+
+  return `/api/profile/addresses`
+}
+
+/**
+ * @summary Add a saved delivery address
+ */
+export const createAddress = async (addressInput: AddressInput, options?: Parameters<typeof customFetch>[1]): Promise<Address> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Address>(getCreateAddressUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(addressInput)
+  }
+);}
+
+
+
+
+
+export const getCreateAddressMutationKey = () => ['createAddress'] as const;
+
+export const getCreateAddressMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAddress>>, TError,CreateAddressMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createAddress>>, TError,CreateAddressMutationVariables, TContext> => {
+
+const mutationKey = getCreateAddressMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createAddress>>, CreateAddressMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createAddress(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateAddressMutationResult = NonNullable<Awaited<ReturnType<typeof createAddress>>>
+    export type CreateAddressMutationBody = BodyType<AddressInput>
+    export type CreateAddressMutationError = ErrorType<unknown>
+    export type CreateAddressMutationVariables = {data: BodyType<AddressInput>}
+
+    /**
+ * @summary Add a saved delivery address
+ */
+export const useCreateAddress = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAddress>>, TError,CreateAddressMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createAddress>>,
+        TError,
+        CreateAddressMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateAddressMutationOptions(options));
+    }
+
+export const getDeleteAddressUrl = (params: DeleteAddressParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/profile/address?${stringifiedParams}` : `/api/profile/address`
+}
+
+/**
+ * @summary Delete a saved address
+ */
+export const deleteAddress = async (params: DeleteAddressParams, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteAddressUrl(params),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteAddressMutationKey = () => ['deleteAddress'] as const;
+
+export const getDeleteAddressMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAddress>>, TError,DeleteAddressMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteAddress>>, TError,DeleteAddressMutationVariables, TContext> => {
+
+const mutationKey = getDeleteAddressMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteAddress>>, DeleteAddressMutationVariables> = (props) => {
+          const {params} = props ?? {};
+
+          return  deleteAddress(params,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteAddressMutationResult = NonNullable<Awaited<ReturnType<typeof deleteAddress>>>
+
+    export type DeleteAddressMutationError = ErrorType<unknown>
+    export type DeleteAddressMutationVariables = {params: DeleteAddressParams}
+
+    /**
+ * @summary Delete a saved address
+ */
+export const useDeleteAddress = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAddress>>, TError,DeleteAddressMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteAddress>>,
+        TError,
+        DeleteAddressMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteAddressMutationOptions(options));
+    }
+
+export const getUpdateAddressUrl = (addressId: string,) => {
+
+
+
+
+  return `/api/profile/addresses/${addressId}`
+}
+
+/**
+ * @summary Update or make a saved address the default
+ */
+export const updateAddress = async (addressId: string,
+    addressUpdate: AddressUpdate, options?: Parameters<typeof customFetch>[1]): Promise<Address> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Address>(getUpdateAddressUrl(addressId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(addressUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateAddressMutationKey = () => ['updateAddress'] as const;
+
+export const getUpdateAddressMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAddress>>, TError,UpdateAddressMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateAddress>>, TError,UpdateAddressMutationVariables, TContext> => {
+
+const mutationKey = getUpdateAddressMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateAddress>>, UpdateAddressMutationVariables> = (props) => {
+          const {addressId,data} = props ?? {};
+
+          return  updateAddress(addressId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateAddressMutationResult = NonNullable<Awaited<ReturnType<typeof updateAddress>>>
+    export type UpdateAddressMutationBody = BodyType<AddressUpdate>
+    export type UpdateAddressMutationError = ErrorType<void>
+    export type UpdateAddressMutationVariables = {addressId: string;data: BodyType<AddressUpdate>}
+
+    /**
+ * @summary Update or make a saved address the default
+ */
+export const useUpdateAddress = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAddress>>, TError,UpdateAddressMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateAddress>>,
+        TError,
+        UpdateAddressMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateAddressMutationOptions(options));
     }
 

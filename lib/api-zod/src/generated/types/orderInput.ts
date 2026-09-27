@@ -9,6 +9,8 @@ import type { OrderInputPaymentMethod } from './orderInputPaymentMethod';
 import type { OrderItemInput } from './orderItemInput';
 
 export interface OrderInput {
+  /** @minLength 16 */
+  clientId: string;
   /** @minItems 1 */
   items: OrderItemInput[];
   /** @minLength 1 */
