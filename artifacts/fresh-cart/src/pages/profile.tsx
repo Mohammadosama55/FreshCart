@@ -1,14 +1,16 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { ArrowRight, Check, CircleAlert, Home, MapPin, Package, Pencil, Plus, RefreshCw, Trash2, UserRound, X } from 'lucide-react';
+import { ArrowRight, Check, CircleAlert, Clock3, Home, MapPin, Package, Pencil, Plus, RefreshCw, Sparkles, Trash2, UserRound, X } from 'lucide-react';
 import { Link } from 'wouter';
 import {
   getGetProfileQueryKey,
   getListOrdersQueryKey,
+  getListProductsQueryKey,
   useCreateAddress,
   useDeleteAddress,
   useGetProfile,
   useListOrders,
+  useListProducts,
   useUpdateAddress,
   useUpdateProfile,
 } from '@workspace/api-client-react';
@@ -29,6 +31,7 @@ export default function Profile() {
   const { add } = useCart();
   const profileQuery = useGetProfile({ clientId }, { query: { enabled: Boolean(clientId), queryKey: getGetProfileQueryKey({ clientId }) } });
   const ordersQuery = useListOrders({ clientId }, { query: { enabled: Boolean(clientId), queryKey: getListOrdersQueryKey({ clientId }) } });
+  const productsQuery = useListProducts(undefined, { query: { queryKey: getListProductsQueryKey() } });
   const updateProfile = useUpdateProfile();
   const createAddress = useCreateAddress();
   const updateAddress = useUpdateAddress();
@@ -131,6 +134,50 @@ export default function Profile() {
     setMessage('Everything from that order is back in your basket.');
   };
 
+  const restock = (items: { product: { id: string }; quantity: number }[]) => {
+    items.forEach((item) => Array.from({ length: item.quantity }).forEach(() => add(item.product.id)));
+    setMessage(items.length === 1 ? 'That staple is back in your basket.' : 'Your likely restocks are back in your basket.');
+  };
+
+  const addresses = profileQuery.data?.addresses ?? [];
+  const orders = ordersQuery.data ?? [];
+  const restockItems = useMemo(() => {
+    const productMap = new Map((productsQuery.data ?? []).map((product) => [product.id, product]));
+    const purchaseHistory = new Map<string, { dates: number[]; quantities: number[] }>();
+
+    orders.forEach((order) => {
+      const date = new Date(order.createdAt).getTime();
+      order.items.forEach((item) => {
+        const history = purchaseHistory.get(item.productId) ?? { dates: [], quantities: [] };
+        history.dates.push(date);
+        history.quantities.push(item.quantity);
+        purchaseHistory.set(item.productId, history);
+      });
+    });
+
+    const now = Date.now();
+    return [...purchaseHistory.entries()]
+      .map(([productId, history]) => {
+        const product = productMap.get(productId);
+        const dates = [...history.dates].sort((a, b) => a - b);
+        if (!product || dates.length < 2) return null;
+        const intervals = dates.slice(1).map((date, index) => date - dates[index]);
+        const averageInterval = intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length;
+        const daysSinceLastPurchase = (now - dates[dates.length - 1]) / 86_400_000;
+        const daysUntilDue = Math.round(averageInterval / 86_400_000 - daysSinceLastPurchase);
+        if (daysUntilDue > 5) return null;
+        return {
+          product,
+          quantity: history.quantities[history.quantities.length - 1] ?? 1,
+          daysUntilDue: Math.max(0, daysUntilDue),
+          confidence: Math.min(96, 58 + dates.length * 9),
+        };
+      })
+      .filter((item): item is NonNullable<typeof item> => Boolean(item))
+      .sort((a, b) => a.daysUntilDue - b.daysUntilDue)
+      .slice(0, 4);
+  }, [orders, productsQuery.data]);
+
   if (profileQuery.isLoading) {
     return <main className="fc-shell py-12"><div className="animate-pulse space-y-6"><div className="h-16 w-72 rounded-2xl bg-[hsl(var(--muted))]" /><div className="grid gap-6 lg:grid-cols-[.8fr_1.2fr]"><div className="h-80 rounded-[26px] bg-[hsl(var(--muted))]" /><div className="h-80 rounded-[26px] bg-[hsl(var(--muted))]" /></div></div></main>;
   }
@@ -138,9 +185,6 @@ export default function Profile() {
   if (profileQuery.isError) {
     return <main className="fc-shell py-16"><div className="mx-auto max-w-md rounded-[26px] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-8 text-center"><CircleAlert className="mx-auto h-9 w-9 text-[hsl(var(--accent))]" /><h1 className="fc-display mt-4 text-4xl font-bold">Your profile is taking a minute.</h1><p className="mt-3 text-sm leading-6 text-[hsl(var(--muted-foreground))]">We could not reach your saved details just now.</p><button type="button" onClick={() => profileQuery.refetch()} className="mt-6 inline-flex items-center gap-2 rounded-full bg-[hsl(var(--primary))] px-5 py-3 text-sm font-bold text-[hsl(var(--primary-foreground))]" data-testid="button-retry-profile"><RefreshCw className="h-4 w-4" /> Try again</button></div></main>;
   }
-
-  const addresses = profileQuery.data?.addresses ?? [];
-  const orders = ordersQuery.data ?? [];
 
   return (
     <main className="fc-shell py-9 md:py-14">
@@ -170,6 +214,17 @@ export default function Profile() {
           </form>
         </section>
       </div>
+      <section className="mt-6 overflow-hidden rounded-[26px] bg-[hsl(var(--foreground))] p-5 text-[hsl(var(--background))] sm:p-7" data-testid="section-kitchen-pulse">
+        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+          <div>
+            <p className="mb-2 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[.16em] text-[hsl(var(--accent))]"><Sparkles className="h-3.5 w-3.5" /> Kitchen Pulse</p>
+            <h2 className="fc-display text-3xl font-bold sm:text-4xl">Your staples have a rhythm.</h2>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-[hsl(var(--background)/.62)]">A private restock radar based only on what you have ordered before. No guesswork, no crowd trends.</p>
+          </div>
+          {restockItems.length > 0 && <button type="button" onClick={() => restock(restockItems)} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[hsl(var(--accent))] px-4 py-3 text-sm font-black text-[hsl(var(--accent-foreground))] transition-transform hover:-translate-y-0.5" data-testid="button-restock-all"><RefreshCw className="h-4 w-4" /> Restock likely items</button>}
+        </div>
+        {restockItems.length > 0 ? <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{restockItems.map((item) => <article key={item.product.id} className="rounded-2xl bg-[hsl(var(--background)/.08)] p-3" data-testid={`card-restock-${item.product.id}`}><div className="flex items-center gap-3"><div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl" style={{ backgroundColor: item.product.accent }}><img src={item.product.image} alt="" className="h-full w-full object-contain p-1" /></div><div className="min-w-0"><p className="truncate text-sm font-black">{item.product.name}</p><p className="mt-1 flex items-center gap-1 text-[11px] text-[hsl(var(--background)/.58)]"><Clock3 className="h-3 w-3" />{item.daysUntilDue === 0 ? 'Due now' : `Likely in ${item.daysUntilDue}d`} · {item.confidence}% fit</p></div></div><button type="button" onClick={() => restock([item])} className="mt-3 flex w-full items-center justify-center gap-1 rounded-xl border border-[hsl(var(--background)/.18)] py-2 text-xs font-bold transition-colors hover:bg-[hsl(var(--background)/.1)]" data-testid={`button-restock-${item.product.id}`}>Add {item.quantity} to basket <ArrowRight className="h-3.5 w-3.5" /></button></article>)}</div> : <div className="mt-6 rounded-2xl border border-dashed border-[hsl(var(--background)/.18)] px-4 py-5 text-sm text-[hsl(var(--background)/.62)]" data-testid="empty-kitchen-pulse">Place the same staple in two different orders and Kitchen Pulse will learn its timing.</div>}
+      </section>
       <section className="mt-6 rounded-[26px] border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-5 sm:p-7" data-testid="section-order-history">
         <div className="mb-6 flex items-end justify-between gap-3"><div><p className="mb-1 text-xs font-bold uppercase tracking-[.16em] text-[hsl(var(--accent))]">The good stuff, again</p><h2 className="fc-display text-3xl font-bold">Order history</h2></div><span className="text-xs font-bold text-[hsl(var(--muted-foreground))]">{orders.length} {orders.length === 1 ? 'order' : 'orders'}</span></div>
         {ordersQuery.isLoading && <div className="space-y-3"><div className="h-20 animate-pulse rounded-2xl bg-[hsl(var(--muted))]" /><div className="h-20 animate-pulse rounded-2xl bg-[hsl(var(--muted))]" /></div>}

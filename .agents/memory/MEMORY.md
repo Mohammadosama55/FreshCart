@@ -1,2 +1,3 @@
 - [Generated client DOM iterable types](generated-client-dom-iterable.md) — Orval web clients need iterable DOM typings for generated Headers helpers.
 - [FreshCart shopper identity](freshcart-shopper-identity.md) — Account and order ownership use a stable browser-scoped client ID until authentication is added.
+- [FreshCart Kitchen Pulse](freshcart-kitchen-pulse.md) — Restock suggestions are derived privately from each shopper's repeated order rhythm.
